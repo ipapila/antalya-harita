@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Antalya İhlal Haritası</title>
+<title>Antalya Ä°hlal HaritasÄ±</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
@@ -85,91 +85,91 @@ body { font-family: system-ui, sans-serif; background: #f5f5f5; }
 <body>
 
 <div id="topbar">
-  <h1>🗺 Antalya İhlal Haritası</h1>
+  <h1>ğŸ—º Antalya Ä°hlal HaritasÄ±</h1>
   <div id="sheets-url-wrap">
     <label>Google Sheets CSV URL:</label>
     <input id="sheets-url" type="text" placeholder="https://docs.google.com/spreadsheets/d/SHEET_ID/export?format=csv&gid=0"/>
-    <button id="yukle-btn" onclick="urldenYukle()">Yükle</button>
+    <button id="yukle-btn" onclick="urldenYukle()">YÃ¼kle</button>
   </div>
-  <span id="son-guncelleme">Henüz yüklenmedi</span>
+  <span id="son-guncelleme">HenÃ¼z yÃ¼klenmedi</span>
 </div>
 
 <div id="app">
   <div id="toolbar">
     <span>Filtrele:</span>
-    <button class="filter-btn active" data-cat="all" style="border-color:#555;color:#555;">Tümü</button>
+    <button class="filter-btn active" data-cat="all" style="border-color:#555;color:#555;">TÃ¼mÃ¼</button>
     <button class="filter-btn" data-cat="maden" style="border-color:#8B4513;color:#8B4513;">Maden</button>
-    <button class="filter-btn" data-cat="kiyi" style="border-color:#1565C0;color:#1565C0;">Kıyı</button>
+    <button class="filter-btn" data-cat="kiyi" style="border-color:#1565C0;color:#1565C0;">KÄ±yÄ±</button>
     <button class="filter-btn" data-cat="su" style="border-color:#0097A7;color:#0097A7;">Su</button>
     <button class="filter-btn" data-cat="orman" style="border-color:#2E7D32;color:#2E7D32;">Orman</button>
-    <button class="filter-btn" data-cat="kamulastirma" style="border-color:#6A1B9A;color:#6A1B9A;">Kamulaştırma</button>
-    <button class="filter-btn" data-cat="tarim" style="border-color:#F57F17;color:#F57F17;">Tarım</button>
-    <button class="filter-btn" data-cat="sit" style="border-color:#C62828;color:#C62828;">SİT/Koruma</button>
-    <button class="filter-btn" data-cat="imar" style="border-color:#E65100;color:#E65100;">İmar</button>
+    <button class="filter-btn" data-cat="kamulastirma" style="border-color:#6A1B9A;color:#6A1B9A;">KamulaÅŸtÄ±rma</button>
+    <button class="filter-btn" data-cat="tarim" style="border-color:#F57F17;color:#F57F17;">TarÄ±m</button>
+    <button class="filter-btn" data-cat="sit" style="border-color:#C62828;color:#C62828;">SÄ°T/Koruma</button>
+    <button class="filter-btn" data-cat="imar" style="border-color:#E65100;color:#E65100;">Ä°mar</button>
   </div>
   <div id="main">
     <div id="map"></div>
     <div id="sidebar">
       <div id="sidebar-header">
-        İhlal Listesi (<span id="count">0</span>)
+        Ä°hlal Listesi (<span id="count">0</span>)
       </div>
       <div id="stats">
         <div class="stat-card"><div class="stat-num" id="s-devam">0</div><div class="stat-lbl">Devam ediyor</div></div>
         <div class="stat-card"><div class="stat-num" id="s-mahkeme">0</div><div class="stat-lbl">Mahkemede</div></div>
         <div class="stat-card"><div class="stat-num" id="s-durduruldu">0</div><div class="stat-lbl">Durduruldu</div></div>
-        <div class="stat-card"><div class="stat-num" id="s-tamamlandi">0</div><div class="stat-lbl">Tamamlandı</div></div>
+        <div class="stat-card"><div class="stat-num" id="s-tamamlandi">0</div><div class="stat-lbl">TamamlandÄ±</div></div>
       </div>
-      <div id="list"><div style="padding:20px;font-size:13px;color:#888;text-align:center;">Google Sheets URL'sini girin ve Yükle'ye tıklayın.</div></div>
+      <div id="list"><div style="padding:20px;font-size:13px;color:#888;text-align:center;">Google Sheets URL'sini girin ve YÃ¼kle'ye tÄ±klayÄ±n.</div></div>
     </div>
   </div>
 </div>
 
-<div id="yukleniyor">⏳ Veriler yükleniyor...</div>
+<div id="yukleniyor">â³ Veriler yÃ¼kleniyor...</div>
 
 <script>
 const CATS = {
   maden:         { label: "Maden",          color: "#8B4513" },
-  kiyi:          { label: "Kıyı",           color: "#1565C0" },
+  kiyi:          { label: "KÄ±yÄ±",           color: "#1565C0" },
   su:            { label: "Su/HES",         color: "#0097A7" },
   orman:         { label: "Orman",          color: "#2E7D32" },
-  kamulastirma:  { label: "Kamulaştırma",   color: "#6A1B9A" },
-  tarim:         { label: "Tarım",          color: "#F57F17" },
-  sit:           { label: "SİT/Koruma",     color: "#C62828" },
-  imar:          { label: "İmar",           color: "#E65100" }
+  kamulastirma:  { label: "KamulaÅŸtÄ±rma",   color: "#6A1B9A" },
+  tarim:         { label: "TarÄ±m",          color: "#F57F17" },
+  sit:           { label: "SÄ°T/Koruma",     color: "#C62828" },
+  imar:          { label: "Ä°mar",           color: "#E65100" }
 };
 const DURUMLAR = {
   devam:       "Devam ediyor",
-  mahkeme:     "Mahkeme süreci",
+  mahkeme:     "Mahkeme sÃ¼reci",
   durduruldu:  "Durduruldu",
-  tamamlandi:  "Tamamlandı"
+  tamamlandi:  "TamamlandÄ±"
 };
 
-// Varsayılan (başlangıç) verisi
+// VarsayÄ±lan (baÅŸlangÄ±Ã§) verisi
 const VARSAYILAN_VERI = [
-  { id:1, ilce:"Kumluca",    lat:36.371, lng:30.285, cat:"maden",        baslik:"Kumluca krom madeni ruhsatlandırması",        aciklama:"Tarım ve zeytinlik araziler üzerinde krom madeni arama ruhsatı.",      durum:"devam",       kaynak:"Antalya Barosu, 2023",              tarih:"2023-01-01" },
-  { id:2, ilce:"Kaş",        lat:36.201, lng:29.638, cat:"kiyi",         baslik:"Kaş marina genişletme projesi",               aciklama:"1. Derece Doğal SİT alanı sınırındaki dolgu çalışmaları.",            durum:"mahkeme",     kaynak:"Çevre Bakanlığı, 2022",             tarih:"2022-06-15" },
-  { id:3, ilce:"Manavgat",   lat:36.787, lng:31.443, cat:"su",           baslik:"Manavgat Çayı HES projesi",                  aciklama:"Nehir ekosistemi ve delta bölgesi risk altında.",                     durum:"mahkeme",     kaynak:"WWF Türkiye, 2023",                 tarih:"2023-03-10" },
-  { id:4, ilce:"Kemer",      lat:36.601, lng:30.558, cat:"orman",        baslik:"Kemer orman alanı turizm tahsisi",           aciklama:"Beydağları eteklerinde orman vasfı değiştiriliyor.",                  durum:"devam",       kaynak:"OGM, 2023",                         tarih:"2023-02-20" },
-  { id:5, ilce:"Alanya",     lat:36.544, lng:31.999, cat:"kiyi",         baslik:"Alanya sahil şeridi kaçak yapılar",          aciklama:"Kıyı kenar çizgisini aşan otel ve apart yapıları.",                  durum:"devam",       kaynak:"Çevre Bakanlığı, 2022",             tarih:"2022-09-01" },
-  { id:6, ilce:"Finike",     lat:36.302, lng:30.147, cat:"tarim",        baslik:"Finike narenciye bahçeleri yapılaşma baskısı",aciklama:"1. sınıf tarım arazisinin imara açılması talebi.",                   durum:"mahkeme",     kaynak:"Finike Tarım İlçe Müd., 2023",      tarih:"2023-04-05" },
-  { id:7, ilce:"Serik",      lat:36.922, lng:31.097, cat:"imar",         baslik:"Serik Boğazkent turizm imar değişikliği",    aciklama:"Konut ve tarım alanlarının yoğun turizm inşaatına açılması.",       durum:"tamamlandi",  kaynak:"Antalya BŞB İmar Md., 2021",        tarih:"2021-11-15" },
-  { id:8, ilce:"Kaş",        lat:36.155, lng:29.562, cat:"sit",          baslik:"Kaş antik kentinde yasadışı kazı/yapı",      aciklama:"Patara antik kenti yakınında arkeolojik SİT ihlali.",               durum:"durduruldu",  kaynak:"Kültür Bakanlığı, 2023",            tarih:"2023-07-20" },
-  { id:9, ilce:"Elmalı",     lat:36.735, lng:29.918, cat:"maden",        baslik:"Elmalı mermer ocağı genişletmesi",           aciklama:"Orman arazisi içinden tarım arazilerine yasadışı genişleme.",        durum:"devam",       kaynak:"Orman İşletmesi, 2023",             tarih:"2023-05-10" },
-  { id:10,ilce:"Demre",      lat:36.245, lng:29.983, cat:"tarim",        baslik:"Demre Myra arazi rantı",                     aciklama:"Örtüaltı tarım arazilerinin turizm amaçlı dönüşüm baskısı.",        durum:"devam",       kaynak:"TEMA Vakfı, 2022",                  tarih:"2022-08-30" },
-  { id:11,ilce:"Konyaaltı",  lat:36.886, lng:30.602, cat:"kiyi",         baslik:"Konyaaltı sahil dolgu projesi",              aciklama:"Özel plaj amaçlı dolgu, kamu kıyısı erişimi engellendi.",           durum:"mahkeme",     kaynak:"Doğa Derneği, 2023",                tarih:"2023-06-01" },
-  { id:12,ilce:"Gündoğmuş",  lat:36.815, lng:32.011, cat:"orman",        baslik:"Gündoğmuş yangın alanı yapılaşma",           aciklama:"2021 yangın alanlarında yapı ruhsatı talepleri.",                    durum:"mahkeme",     kaynak:"Greenpeace, 2022",                  tarih:"2022-04-15" },
-  { id:13,ilce:"Akseki",     lat:37.052, lng:31.793, cat:"su",           baslik:"Akseki Değirmen Deresi HES",                 aciklama:"Su debisinin kritik düzeyde azalması.",                              durum:"tamamlandi",  kaynak:"DSİ 13. Bölge, 2020",               tarih:"2020-12-01" },
-  { id:14,ilce:"Muratpaşa",  lat:36.888, lng:30.711, cat:"kamulastirma", baslik:"Muratpaşa acele kamulaştırma",               aciklama:"400+ konutun acele kamulaştırılması.",                               durum:"mahkeme",     kaynak:"Resmi Gazete, 2022",                tarih:"2022-03-20" },
-  { id:15,ilce:"Kepez",      lat:36.930, lng:30.686, cat:"kamulastirma", baslik:"Kepez sanayi dönüşüm kamulaştırması",        aciklama:"Acele kamulaştırma kararıyla el konulan tarım parselleri.",         durum:"devam",       kaynak:"Resmi Gazete, 2023",                tarih:"2023-01-30" },
-  { id:16,ilce:"Döşemealtı", lat:37.056, lng:30.614, cat:"maden",        baslik:"Döşemealtı kireçtaşı ocakları",              aciklama:"İçme suyu havzasına yakın ocak faaliyetleri.",                       durum:"devam",       kaynak:"ASKİ, 2023",                        tarih:"2023-02-10" },
-  { id:17,ilce:"Korkuteli",  lat:37.065, lng:30.196, cat:"tarim",        baslik:"Korkuteli ovası imara açılma baskısı",       aciklama:"1. derece tarım toprağında plan değişikliği girişimleri.",          durum:"durduruldu",  kaynak:"Ziraat Odası, 2022",                tarih:"2022-10-05" },
-  { id:18,ilce:"İbradı",     lat:37.037, lng:31.569, cat:"su",           baslik:"İbradı Dim Çayı regülatör projesi",          aciklama:"Dim Barajı ekosisteminin olumsuz etkilenmesi.",                      durum:"tamamlandi",  kaynak:"DSİ raporu, 2021",                  tarih:"2021-07-01" },
-  { id:19,ilce:"Alanya",     lat:36.511, lng:32.048, cat:"sit",          baslik:"Alanya kalesinde ruhsatsız restorasyon",     aciklama:"Tarihi SİT alanı içinde izinsiz onarım çalışmaları.",               durum:"durduruldu",  kaynak:"Kültür Bakanlığı, 2023",            tarih:"2023-08-12" },
-  { id:20,ilce:"Kumluca",    lat:36.362, lng:30.236, cat:"tarim",        baslik:"Kumluca sera arazisi tahrip",                aciklama:"Yol güzergahı değişikliği ile sera alanlarının tahrip edilmesi.",   durum:"mahkeme",     kaynak:"Ziraat Odası, 2022",                tarih:"2022-11-20" },
-  { id:21,ilce:"Serik",      lat:36.853, lng:31.194, cat:"kiyi",         baslik:"Serik Belek kıyı tahsisi",                   aciklama:"Kamu plajlarının özel tesis kullanımına kapatılması.",               durum:"devam",       kaynak:"Tüketici Federasyonu, 2023",        tarih:"2023-05-25" },
-  { id:22,ilce:"Finike",     lat:36.291, lng:30.089, cat:"orman",        baslik:"Finike orman yolu açma ihlali",              aciklama:"Maden arama amacıyla izinsiz orman yolu açılması.",                 durum:"durduruldu",  kaynak:"Orman İşletmesi, 2023",             tarih:"2023-03-30" },
-  { id:23,ilce:"Manavgat",   lat:36.812, lng:31.521, cat:"imar",         baslik:"Manavgat Side kıyı imar artışı",             aciklama:"TAKS/KAKS artırımı içeren imar planı değişikliği.",                 durum:"devam",       kaynak:"Antalya BŞB, 2023",                 tarih:"2023-06-10" },
-  { id:24,ilce:"Kemer",      lat:36.575, lng:30.499, cat:"sit",          baslik:"Kemer Phaselis SİT ihlali",                  aciklama:"Antik liman alanı yakınında tatil köyü inşaatı ruhsatı.",          durum:"mahkeme",     kaynak:"Doğa Derneği, 2022",                tarih:"2022-12-01" },
+  { id:1, ilce:"Kumluca",    lat:36.371, lng:30.285, cat:"maden",        baslik:"Kumluca krom madeni ruhsatlandÄ±rmasÄ±",        aciklama:"TarÄ±m ve zeytinlik araziler Ã¼zerinde krom madeni arama ruhsatÄ±.",      durum:"devam",       kaynak:"Antalya Barosu, 2023",              tarih:"2023-01-01" },
+  { id:2, ilce:"KaÅŸ",        lat:36.201, lng:29.638, cat:"kiyi",         baslik:"KaÅŸ marina geniÅŸletme projesi",               aciklama:"1. Derece DoÄŸal SÄ°T alanÄ± sÄ±nÄ±rÄ±ndaki dolgu Ã§alÄ±ÅŸmalarÄ±.",            durum:"mahkeme",     kaynak:"Ã‡evre BakanlÄ±ÄŸÄ±, 2022",             tarih:"2022-06-15" },
+  { id:3, ilce:"Manavgat",   lat:36.787, lng:31.443, cat:"su",           baslik:"Manavgat Ã‡ayÄ± HES projesi",                  aciklama:"Nehir ekosistemi ve delta bÃ¶lgesi risk altÄ±nda.",                     durum:"mahkeme",     kaynak:"WWF TÃ¼rkiye, 2023",                 tarih:"2023-03-10" },
+  { id:4, ilce:"Kemer",      lat:36.601, lng:30.558, cat:"orman",        baslik:"Kemer orman alanÄ± turizm tahsisi",           aciklama:"BeydaÄŸlarÄ± eteklerinde orman vasfÄ± deÄŸiÅŸtiriliyor.",                  durum:"devam",       kaynak:"OGM, 2023",                         tarih:"2023-02-20" },
+  { id:5, ilce:"Alanya",     lat:36.544, lng:31.999, cat:"kiyi",         baslik:"Alanya sahil ÅŸeridi kaÃ§ak yapÄ±lar",          aciklama:"KÄ±yÄ± kenar Ã§izgisini aÅŸan otel ve apart yapÄ±larÄ±.",                  durum:"devam",       kaynak:"Ã‡evre BakanlÄ±ÄŸÄ±, 2022",             tarih:"2022-09-01" },
+  { id:6, ilce:"Finike",     lat:36.302, lng:30.147, cat:"tarim",        baslik:"Finike narenciye bahÃ§eleri yapÄ±laÅŸma baskÄ±sÄ±",aciklama:"1. sÄ±nÄ±f tarÄ±m arazisinin imara aÃ§Ä±lmasÄ± talebi.",                   durum:"mahkeme",     kaynak:"Finike TarÄ±m Ä°lÃ§e MÃ¼d., 2023",      tarih:"2023-04-05" },
+  { id:7, ilce:"Serik",      lat:36.922, lng:31.097, cat:"imar",         baslik:"Serik BoÄŸazkent turizm imar deÄŸiÅŸikliÄŸi",    aciklama:"Konut ve tarÄ±m alanlarÄ±nÄ±n yoÄŸun turizm inÅŸaatÄ±na aÃ§Ä±lmasÄ±.",       durum:"tamamlandi",  kaynak:"Antalya BÅB Ä°mar Md., 2021",        tarih:"2021-11-15" },
+  { id:8, ilce:"KaÅŸ",        lat:36.155, lng:29.562, cat:"sit",          baslik:"KaÅŸ antik kentinde yasadÄ±ÅŸÄ± kazÄ±/yapÄ±",      aciklama:"Patara antik kenti yakÄ±nÄ±nda arkeolojik SÄ°T ihlali.",               durum:"durduruldu",  kaynak:"KÃ¼ltÃ¼r BakanlÄ±ÄŸÄ±, 2023",            tarih:"2023-07-20" },
+  { id:9, ilce:"ElmalÄ±",     lat:36.735, lng:29.918, cat:"maden",        baslik:"ElmalÄ± mermer ocaÄŸÄ± geniÅŸletmesi",           aciklama:"Orman arazisi iÃ§inden tarÄ±m arazilerine yasadÄ±ÅŸÄ± geniÅŸleme.",        durum:"devam",       kaynak:"Orman Ä°ÅŸletmesi, 2023",             tarih:"2023-05-10" },
+  { id:10,ilce:"Demre",      lat:36.245, lng:29.983, cat:"tarim",        baslik:"Demre Myra arazi rantÄ±",                     aciklama:"Ã–rtÃ¼altÄ± tarÄ±m arazilerinin turizm amaÃ§lÄ± dÃ¶nÃ¼ÅŸÃ¼m baskÄ±sÄ±.",        durum:"devam",       kaynak:"TEMA VakfÄ±, 2022",                  tarih:"2022-08-30" },
+  { id:11,ilce:"KonyaaltÄ±",  lat:36.886, lng:30.602, cat:"kiyi",         baslik:"KonyaaltÄ± sahil dolgu projesi",              aciklama:"Ã–zel plaj amaÃ§lÄ± dolgu, kamu kÄ±yÄ±sÄ± eriÅŸimi engellendi.",           durum:"mahkeme",     kaynak:"DoÄŸa DerneÄŸi, 2023",                tarih:"2023-06-01" },
+  { id:12,ilce:"GÃ¼ndoÄŸmuÅŸ",  lat:36.815, lng:32.011, cat:"orman",        baslik:"GÃ¼ndoÄŸmuÅŸ yangÄ±n alanÄ± yapÄ±laÅŸma",           aciklama:"2021 yangÄ±n alanlarÄ±nda yapÄ± ruhsatÄ± talepleri.",                    durum:"mahkeme",     kaynak:"Greenpeace, 2022",                  tarih:"2022-04-15" },
+  { id:13,ilce:"Akseki",     lat:37.052, lng:31.793, cat:"su",           baslik:"Akseki DeÄŸirmen Deresi HES",                 aciklama:"Su debisinin kritik dÃ¼zeyde azalmasÄ±.",                              durum:"tamamlandi",  kaynak:"DSÄ° 13. BÃ¶lge, 2020",               tarih:"2020-12-01" },
+  { id:14,ilce:"MuratpaÅŸa",  lat:36.888, lng:30.711, cat:"kamulastirma", baslik:"MuratpaÅŸa acele kamulaÅŸtÄ±rma",               aciklama:"400+ konutun acele kamulaÅŸtÄ±rÄ±lmasÄ±.",                               durum:"mahkeme",     kaynak:"Resmi Gazete, 2022",                tarih:"2022-03-20" },
+  { id:15,ilce:"Kepez",      lat:36.930, lng:30.686, cat:"kamulastirma", baslik:"Kepez sanayi dÃ¶nÃ¼ÅŸÃ¼m kamulaÅŸtÄ±rmasÄ±",        aciklama:"Acele kamulaÅŸtÄ±rma kararÄ±yla el konulan tarÄ±m parselleri.",         durum:"devam",       kaynak:"Resmi Gazete, 2023",                tarih:"2023-01-30" },
+  { id:16,ilce:"DÃ¶ÅŸemealtÄ±", lat:37.056, lng:30.614, cat:"maden",        baslik:"DÃ¶ÅŸemealtÄ± kireÃ§taÅŸÄ± ocaklarÄ±",              aciklama:"Ä°Ã§me suyu havzasÄ±na yakÄ±n ocak faaliyetleri.",                       durum:"devam",       kaynak:"ASKÄ°, 2023",                        tarih:"2023-02-10" },
+  { id:17,ilce:"Korkuteli",  lat:37.065, lng:30.196, cat:"tarim",        baslik:"Korkuteli ovasÄ± imara aÃ§Ä±lma baskÄ±sÄ±",       aciklama:"1. derece tarÄ±m topraÄŸÄ±nda plan deÄŸiÅŸikliÄŸi giriÅŸimleri.",          durum:"durduruldu",  kaynak:"Ziraat OdasÄ±, 2022",                tarih:"2022-10-05" },
+  { id:18,ilce:"Ä°bradÄ±",     lat:37.037, lng:31.569, cat:"su",           baslik:"Ä°bradÄ± Dim Ã‡ayÄ± regÃ¼latÃ¶r projesi",          aciklama:"Dim BarajÄ± ekosisteminin olumsuz etkilenmesi.",                      durum:"tamamlandi",  kaynak:"DSÄ° raporu, 2021",                  tarih:"2021-07-01" },
+  { id:19,ilce:"Alanya",     lat:36.511, lng:32.048, cat:"sit",          baslik:"Alanya kalesinde ruhsatsÄ±z restorasyon",     aciklama:"Tarihi SÄ°T alanÄ± iÃ§inde izinsiz onarÄ±m Ã§alÄ±ÅŸmalarÄ±.",               durum:"durduruldu",  kaynak:"KÃ¼ltÃ¼r BakanlÄ±ÄŸÄ±, 2023",            tarih:"2023-08-12" },
+  { id:20,ilce:"Kumluca",    lat:36.362, lng:30.236, cat:"tarim",        baslik:"Kumluca sera arazisi tahrip",                aciklama:"Yol gÃ¼zergahÄ± deÄŸiÅŸikliÄŸi ile sera alanlarÄ±nÄ±n tahrip edilmesi.",   durum:"mahkeme",     kaynak:"Ziraat OdasÄ±, 2022",                tarih:"2022-11-20" },
+  { id:21,ilce:"Serik",      lat:36.853, lng:31.194, cat:"kiyi",         baslik:"Serik Belek kÄ±yÄ± tahsisi",                   aciklama:"Kamu plajlarÄ±nÄ±n Ã¶zel tesis kullanÄ±mÄ±na kapatÄ±lmasÄ±.",               durum:"devam",       kaynak:"TÃ¼ketici Federasyonu, 2023",        tarih:"2023-05-25" },
+  { id:22,ilce:"Finike",     lat:36.291, lng:30.089, cat:"orman",        baslik:"Finike orman yolu aÃ§ma ihlali",              aciklama:"Maden arama amacÄ±yla izinsiz orman yolu aÃ§Ä±lmasÄ±.",                 durum:"durduruldu",  kaynak:"Orman Ä°ÅŸletmesi, 2023",             tarih:"2023-03-30" },
+  { id:23,ilce:"Manavgat",   lat:36.812, lng:31.521, cat:"imar",         baslik:"Manavgat Side kÄ±yÄ± imar artÄ±ÅŸÄ±",             aciklama:"TAKS/KAKS artÄ±rÄ±mÄ± iÃ§eren imar planÄ± deÄŸiÅŸikliÄŸi.",                 durum:"devam",       kaynak:"Antalya BÅB, 2023",                 tarih:"2023-06-10" },
+  { id:24,ilce:"Kemer",      lat:36.575, lng:30.499, cat:"sit",          baslik:"Kemer Phaselis SÄ°T ihlali",                  aciklama:"Antik liman alanÄ± yakÄ±nÄ±nda tatil kÃ¶yÃ¼ inÅŸaatÄ± ruhsatÄ±.",          durum:"mahkeme",     kaynak:"DoÄŸa DerneÄŸi, 2022",                tarih:"2022-12-01" },
 ];
 
 let tumVeri = [...VARSAYILAN_VERI];
@@ -177,12 +177,12 @@ let aktifCat = "all";
 let markers = [];
 let map;
 
-// ---- CSV → JSON ----
+// ---- CSV â†’ JSON ----
 function csvSatirIsleme(ham) {
   const satirlar = ham.trim().split("\n");
   const basliklar = satirlar[0].split(",").map(s => s.trim().replace(/"/g,"").toLowerCase());
   return satirlar.slice(1).map(satir => {
-    // Basit CSV parse (içinde virgül olmadığı varsayımıyla)
+    // Basit CSV parse (iÃ§inde virgÃ¼l olmadÄ±ÄŸÄ± varsayÄ±mÄ±yla)
     const degerler = satir.split(",").map(s => s.trim().replace(/^"|"$/g,""));
     const obj = {};
     basliklar.forEach((b,i) => obj[b] = degerler[i] || "");
@@ -203,20 +203,20 @@ function csvSatirIsleme(ham) {
 
 async function urldenYukle() {
   const url = document.getElementById("sheets-url").value.trim();
-  if (!url) { alert("Lütfen Google Sheets CSV URL'sini girin."); return; }
+  if (!url) { alert("LÃ¼tfen Google Sheets CSV URL'sini girin."); return; }
   document.getElementById("yukleniyor").style.display = "block";
   try {
     const r = await fetch(url);
     if (!r.ok) throw new Error("HTTP " + r.status);
     const csv = await r.text();
     const yeniVeri = csvSatirIsleme(csv);
-    if (yeniVeri.length === 0) throw new Error("Veri bulunamadı");
+    if (yeniVeri.length === 0) throw new Error("Veri bulunamadÄ±");
     tumVeri = yeniVeri;
     document.getElementById("son-guncelleme").textContent =
-      "Son güncelleme: " + new Date().toLocaleString("tr-TR");
+      "Son gÃ¼ncelleme: " + new Date().toLocaleString("tr-TR");
     guncelle();
   } catch(e) {
-    alert("Yükleme hatası: " + e.message + "\n\nSheets'in CSV olarak paylaşıldığından emin olun.");
+    alert("YÃ¼kleme hatasÄ±: " + e.message + "\n\nSheets'in CSV olarak paylaÅŸÄ±ldÄ±ÄŸÄ±ndan emin olun.");
   } finally {
     document.getElementById("yukleniyor").style.display = "none";
   }
@@ -245,7 +245,7 @@ function renderList(data) {
     document.getElementById("s-"+k).textContent = c[k]);
 
   if (data.length === 0) {
-    list.innerHTML = '<div style="padding:20px;font-size:13px;color:#888;text-align:center;">Bu kategoride kayıt yok.</div>';
+    list.innerHTML = '<div style="padding:20px;font-size:13px;color:#888;text-align:center;">Bu kategoride kayÄ±t yok.</div>';
     return;
   }
   data.sort((a,b) => (b.tarih||"").localeCompare(a.tarih||"")).forEach(item => {
@@ -256,7 +256,7 @@ function renderList(data) {
       <div class="ihlal-ilce">${item.ilce}</div>
       <div class="ihlal-baslik">${item.baslik}</div>
       <span class="ihlal-badge" style="background:${cat.color}">${cat.label}</span>
-      <div class="ihlal-durum" style="color:${durumColor(item.durum)}">● ${DURUMLAR[item.durum] || item.durum}</div>
+      <div class="ihlal-durum" style="color:${durumColor(item.durum)}">â— ${DURUMLAR[item.durum] || item.durum}</div>
       ${item.tarih ? `<div class="ihlal-tarih">${item.tarih}</div>` : ''}
     `;
     div.onclick = () => {
@@ -276,12 +276,12 @@ function guncelle() {
     const m = L.marker([item.lat, item.lng], { icon: createIcon(item.cat) });
     m._id = item.id;
     const linkHtml = item.kaynak && item.kaynak.startsWith("http")
-      ? `<a class="popup-link" href="${item.kaynak}" target="_blank">🔗 Kaynak</a>`
+      ? `<a class="popup-link" href="${item.kaynak}" target="_blank">ğŸ”— Kaynak</a>`
       : `<div class="popup-row"><strong>Kaynak:</strong> ${item.kaynak}</div>`;
     m.bindPopup(`
       <div class="popup-title">${item.baslik}</div>
       <span class="popup-badge" style="background:${cat.color}">${cat.label}</span>
-      <div class="popup-row"><strong>İlçe:</strong> ${item.ilce}</div>
+      <div class="popup-row"><strong>Ä°lÃ§e:</strong> ${item.ilce}</div>
       <div class="popup-row" style="margin-top:6px;line-height:1.5">${item.aciklama}</div>
       <div class="popup-row" style="margin-top:6px;color:${durumColor(item.durum)}"><strong>Durum:</strong> ${DURUMLAR[item.durum] || item.durum}</div>
       ${linkHtml}
@@ -293,7 +293,7 @@ function guncelle() {
   renderList(data);
 }
 
-// ---- Filtre butonları ----
+// ---- Filtre butonlarÄ± ----
 document.querySelectorAll('.filter-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.filter-btn').forEach(b => {
@@ -310,15 +310,39 @@ document.querySelectorAll('.filter-btn').forEach(btn => {
   });
 });
 
-// ---- Leaflet başlat ----
+// ---- Leaflet baÅŸlat ----
 map = L.map('map').setView([36.7, 30.7], 9);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  attribution: '© OpenStreetMap', maxZoom: 18
+  attribution: 'Â© OpenStreetMap', maxZoom: 18
 }).addTo(map);
 
-// Başlangıç verisiyle yükle
-guncelle();
-document.getElementById("son-guncelleme").textContent = "Varsayılan veri yüklendi";
+// Google Sheets CSV URL â€” otomatik yÃ¼kle
+const SHEETS_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSn2gU2JlMA_cdcsZrM2b22FFopJqB1Bme-Exgx9WDB1pfO5jHjtdpDUNo0RGwuZIWxN-uXdd-2Mhcq/pub?gid=330248702&single=true&output=csv";
+document.getElementById("sheets-url").value = SHEETS_CSV_URL;
+
+// Sayfa aÃ§Ä±lÄ±nca otomatik yÃ¼kle
+(async () => {
+  document.getElementById("yukleniyor").style.display = "block";
+  try {
+    const r = await fetch(SHEETS_CSV_URL);
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    const csv = await r.text();
+    const yeniVeri = csvSatirIsleme(csv);
+    if (yeniVeri.length > 0) {
+      tumVeri = yeniVeri;
+      document.getElementById("son-guncelleme").textContent =
+        "Son gÃ¼ncelleme: " + new Date().toLocaleString("tr-TR");
+    } else {
+      throw new Error("Veri boÅŸ");
+    }
+  } catch(e) {
+    // Sheets'ten veri gelmezse varsayÄ±lan veri kullan
+    document.getElementById("son-guncelleme").textContent = "VarsayÄ±lan veri yÃ¼klendi";
+  } finally {
+    document.getElementById("yukleniyor").style.display = "none";
+    guncelle();
+  }
+})();
 </script>
 </body>
 </html>
