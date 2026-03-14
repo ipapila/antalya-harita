@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Antalya Ekoloji & İhale İzleme Sistemi</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; font-family: 'Segoe UI', system-ui, sans-serif; font-size: 14px; background: #f5f5f3; color: #1a1a18; }
+
+  #app { display: flex; flex-direction: column; height: 100vh; }
+  #header { display: flex; align-items: center; justify-content: space-between; padding: 0 18px; height: 56px; background: #fff; border-bottom: 1px solid #e5e4df; flex-shrink: 0; gap: 12px; flex-wrap: wrap; }
+  .h-left { display: flex; align-items: center; gap: 12px; }
+  .logo { width: 32px; height: 32px; background: #1a6b3c; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 16px; flex-shrink: 0; }
+  .h-title { font-size: 15px; font-weight: 600; line-height: 1.2; }
+  .h-sub { font-size: 11px; color: #888; margin-top: 1px; }
+  .h-right { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+
+  #main { display: flex; flex: 1; min-height: 0; }
+  #sidebar { width: 340px; flex-shrink: 0; display: flex; flex-direction: column; background: #fff; border-right: 1px solid #e5e4df; overflow: hidden; }
+  #map-wrap { flex: 1; position: relative; }
+  #map { width: 100%; height: 100%; }
+
+  #stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; padding: 10px 12px; border-bottom: 1px solid #e5e4df; flex-shrink: 0; }
+  .sc { background: #f5f5f3; border-radius: 8px; padding: 7px 6px; text-align: center; }
+  .sn { font-size: 19px; font-weight: 600; line-height: 1.2; }
+  .sl { font-size: 10px; color: #888; margin-top: 1px; }
+
+  #filters { padding: 10px 12px; border-bottom: 1px solid #e5e4df; flex-shrink: 0; display: flex; flex-direction: column; gap: 7px; }
+  #filters select, #filters input[type="text"] { width: 100%; height: 32px; border: 1px solid #ddd; border-radius: 6px; padding: 0 8px; font-size: 12px; color: #1a1a18; background: #fff; outline: none; }
+  #filters select:focus, #filters input:focus { border-color: #1a6b3c; }
+  .frow { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+  #filters input[type="date"] { width: 100%; height: 32px; border: 1px solid #ddd; border-radius: 6px; padding: 0 6px; font-size: 11px; background: #fff; outline: none; }
+  #filters input[type="date"]:focus { border-color: #1a6b3c; }
+  .flabel { font-size: 10px; color: #888; margin-bottom: 2px; }
+
+  #list { flex: 1; overflow-y: auto; }
+  .rec { padding: 9px 12px; border-bottom: 1px solid #f0f0ee; cursor: pointer; transition: background 0.1s; }
+  .rec:hover { background: #f9f9f7; }
+  .rec.sel { background: #f0faf4; border-left: 3px solid #1a6b3c; padding-left: 9px; }
+  .rt { display: flex; align-items: flex-start; gap: 5px; margin-bottom: 3px; }
+  .rtit { font-size: 12px; font-weight: 500; flex: 1; line-height: 1.4; }
+  .badge { font-size: 9px; padding: 2px 6px; border-radius: 4px; flex-shrink: 0; font-weight: 600; white-space: nowrap; }
+  .b-y { background: #fde8e8; color: #b91c1c; }
+  .b-o { background: #fef3c7; color: #92400e; }
+  .b-g { background: #d1fae5; color: #065f46; }
+  .rm { font-size: 10px; color: #888; display: flex; gap: 5px; flex-wrap: wrap; align-items: center; }
+  .kb { font-size: 9px; padding: 1px 5px; border-radius: 3px; background: #e8f4fd; color: #1e5fa0; font-weight: 500; }
+  .k-durum { font-size: 9px; padding: 1px 5px; border-radius: 3px; background: #f0f0ee; color: #555; }
+  .nodata { padding: 30px 16px; text-align: center; color: #aaa; font-size: 12px; }
+
+  #det { display: none; border-top: 1px solid #e5e4df; flex-shrink: 0; background: #fff; max-height: 220px; overflow-y: auto; padding: 12px; }
+  .det-hdr { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; margin-bottom: 10px; }
+  .det-title { font-size: 13px; font-weight: 600; line-height: 1.4; flex: 1; }
+  .det-close { background: none; border: none; cursor: pointer; font-size: 16px; color: #aaa; padding: 0; }
+  .dr { display: flex; gap: 8px; margin-bottom: 4px; font-size: 11px; align-items: flex-start; }
+  .dl { color: #888; width: 72px; flex-shrink: 0; }
+  .dv { color: #1a1a18; line-height: 1.4; }
+  .dv a { color: #1a6b3c; text-decoration: none; }
+  .dv a:hover { text-decoration: underline; }
+  .det-actions { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+
+  .btn { display: inline-flex; align-items: center; gap: 5px; height: 32px; padding: 0 14px; border-radius: 6px; border: 1px solid #ddd; background: #fff; color: #1a1a18; font-size: 12px; cursor: pointer; font-family: inherit; transition: all 0.15s; white-space: nowrap; }
+  .btn:hover { background: #f5f5f3; border-color: #ccc; }
+  .btn:active { transform: scale(0.98); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn-primary { background: #1a6b3c; border-color: #1a6b3c; color: #fff; }
+  .btn-primary:hover { background: #15592f; }
+  .btn-sm { height: 26px; padding: 0 10px; font-size: 11px; }
+
+  #export-bar { padding: 8px 12px; border-top: 1px solid #e5e4df; background: #fafaf8; display: flex; gap: 6px; align-items: center; flex-shrink: 0; flex-wrap: wrap; }
+  #export-bar span { font-size: 10px; color: #888; }
+
+  #loading-overlay { display: none; position: absolute; inset: 0; background: rgba(255,255,255,0.85); z-index: 2000; align-items: center; justify-content: center; flex-direction: column; gap: 12px; }
+  #loading-overlay.show { display: flex; }
+  .spinner { width: 32px; height: 32px; border: 3px solid #e5e4df; border-top-color: #1a6b3c; border-radius: 50%; animation: spin 0.8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  #notif { display: none; position: fixed; top: 0; left: 0; right: 0; z-index: 9999; padding: 10px 18px; font-size: 12px; font-weight: 500; }
+  .notif-err { background: #fde8e8; color: #b91c1c; border-bottom: 1px solid #fca5a5; }
+  .notif-ok  { background: #d1fae5; color: #065f46; border-bottom: 1px solid #6ee7b7; }
+
+  .legend { position: absolute; bottom: 28px; right: 12px; z-index: 1000; background: #fff; border: 1px solid #e5e4df; border-radius: 8px; padding: 9px 12px; font-size: 11px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+  .lr { display: flex; align-items: center; gap: 7px; margin-bottom: 4px; }
+  .lr:last-child { margin-bottom: 0; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+  .leg-title { font-size: 10px; font-weight: 600; color: #888; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+  #list::-webkit-scrollbar, #det::-webkit-scrollbar { width: 4px; }
+  #list::-webkit-scrollbar-thumb, #det::-webkit-scrollbar-thumb { background: #ddd; border-radius: 4px; }
+
+  @media (max-width: 700px) {
+    #sidebar { width: 100%; height: 50%; border-right: none; border-bottom: 1px solid #e5e4df; }
+    #main { flex-direction: column; }
+    #map-wrap { height: 50%; }
+  }
+</style>
+</head>
+<body>
+
+<div id="notif"></div>
+
+<div id="app">
+  <div id="header">
+    <div class="h-left">
+      <div class="logo">🌿</div>
+      <div>
+        <div class="h-title">Antalya Ekoloji & İhale İzleme</div>
+        <div class="h-sub" id="last-update">Veri yükleniyor...</div>
+      </div>
+    </div>
+    <div class="h-right">
+      <button class="btn btn-primary btn-sm" onclick="loadData()">🔄 Yenile</button>
+    </div>
+  </div>
+
+  <div id="main">
+    <div id="sidebar">
+      <div id="stats">
+        <div class="sc"><div class="sn" id="st-all">—</div><div class="sl">Toplam</div></div>
+        <div class="sc"><div class="sn" id="st-yuk" style="color:#b91c1c">—</div><div class="sl">Yüksek</div></div>
+        <div class="sc"><div class="sn" id="st-dev" style="color:#1a6b3c">—</div><div class="sl">Devam</div></div>
+        <div class="sc"><div class="sn" id="st-ay">—</div><div class="sl">Bu ay</div></div>
+      </div>
+
+      <div id="filters">
+        <input type="text" id="f-search" placeholder="🔍 Başlık veya açıklama ara..." oninput="applyF()">
+        <div class="frow">
+          <div>
+            <div class="flabel">İlçe</div>
+            <select id="f-ilce" onchange="applyF()">
+              <option value="">Tümü</option>
+              <option>Aksu</option><option>Akseki</option><option>Alanya</option><option>Döşemealtı</option>
+              <option>Elmalı</option><option>Finike</option><option>Gazipaşa</option><option>Gündoğmuş</option>
+              <option>İbradı</option><option>Kaş</option><option>Kemer</option><option>Kepez</option>
+              <option>Konyaaltı</option><option>Korkuteli</option><option>Kumluca</option>
+              <option>Manavgat</option><option>Muratpaşa</option><option>Serik</option>
+            </select>
+          </div>
+          <div>
+            <div class="flabel">Kategori</div>
+            <select id="f-kat" onchange="applyF()">
+              <option value="">Tümü</option>
+              <option>DSİ</option><option>EPDK</option><option>ÇED</option><option>Maden</option>
+              <option>Orman</option><option>Kamulaştırma</option><option>Kıyı</option>
+              <option>Enerji</option><option>HES</option><option>RES</option><option>GES</option>
+            </select>
+          </div>
+        </div>
+        <div class="frow">
+          <div>
+            <div class="flabel">Risk</div>
+            <select id="f-risk" onchange="applyF()">
+              <option value="">Tümü</option>
+              <option value="yüksek">Yüksek</option>
+              <option value="orta">Orta</option>
+              <option value="düşük">Düşük</option>
+            </select>
+          </div>
+          <div>
+            <div class="flabel">Durum</div>
+            <select id="f-durum" onchange="applyF()">
+              <option value="">Tümü</option>
+              <option value="devam">Devam ediyor</option>
+              <option value="askıda">Askıda</option>
+              <option value="tamamlandı">Tamamlandı</option>
+              <option value="iptal">İptal</option>
+            </select>
+          </div>
+        </div>
+        <div class="frow">
+          <div>
+            <div class="flabel">Başlangıç tarihi</div>
+            <input type="date" id="f-d1" onchange="applyF()">
+          </div>
+          <div>
+            <div class="flabel">Bitiş tarihi</div>
+            <input type="date" id="f-d2" onchange="applyF()">
+          </div>
+        </div>
+      </div>
+
+      <div id="list"></div>
+
+      <div id="det">
+        <div class="det-hdr">
+          <div class="det-title" id="det-title"></div>
+          <button class="det-close" onclick="closeDet()">✕</button>
+        </div>
+        <div id="det-body"></div>
+        <div class="det-actions" id="det-actions"></div>
+      </div>
+
+      <div id="export-bar">
+        <span>Dışa aktar:</span>
+        <button class="btn btn-sm" onclick="exportCSV()">CSV</button>
+        <button class="btn btn-sm" onclick="exportJSON()">JSON</button>
+        <button class="btn btn-sm" onclick="exportGeoJSON()">GeoJSON</button>
+      </div>
+    </div>
+
+    <div id="map-wrap">
+      <div id="map"></div>
+      <div id="loading-overlay">
+        <div class="spinner"></div>
+        <span style="font-size:12px;color:#666">Veri yükleniyor...</span>
+      </div>
+      <div class="legend">
+        <div class="leg-title">Risk Seviyesi</div>
+        <div class="lr"><span class="dot" style="background:#e24b4a"></span>Yüksek</div>
+        <div class="lr"><span class="dot" style="background:#ef9f27"></span>Orta</div>
+        <div class="lr"><span class="dot" style="background:#1d9e75"></span>Düşük</div>
+        <div style="margin-top:8px" class="leg-title">Kategoriler</div>
+        <div class="lr" style="font-size:10px">⛏ Maden &nbsp; 💧 Su/HES</div>
+        <div class="lr" style="font-size:10px">🌲 Orman &nbsp; 🌊 Kıyı</div>
+        <div class="lr" style="font-size:10px">⚡ Enerji &nbsp; 📋 ÇED</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+let allData = [], filtered = [], map_, markers = {}, selId = null;
+
+const ICONS = {DSİ:'💧',EPDK:'📋',ÇED:'📋',Maden:'⛏',Orman:'🌲',Kamulaştırma:'📌',Kıyı:'🌊',Enerji:'⚡',HES:'💧',RES:'🌬',GES:'☀'};
+
+// ── Init ─────────────────────────────────────────────────────────────────────
+function init() {
+  map_ = L.map('map').setView([36.85, 30.85], 9);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© <a href="https://openstreetmap.org">OpenStreetMap</a>',
+    maxZoom: 19
+  }).addTo(map_);
+  loadData();
+}
+
+// ── data.json'dan veri çek ───────────────────────────────────────────────────
+async function loadData() {
+  document.getElementById('loading-overlay').classList.add('show');
+  try {
+    const resp = await fetch('./data.json?t=' + Date.now());
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    const payload = await resp.json();
+    allData = Array.isArray(payload.records) ? payload.records : [];
+    const upd = payload.updated_at_tr || payload.updated_at || '—';
+    document.getElementById('last-update').textContent = 'Son güncelleme: ' + upd + ' · ' + allData.length + ' kayıt';
+  } catch (e) {
+    showNotif('data.json yüklenemedi: ' + e.message + ' — sunucunun çalıştığından emin olun.', 'err');
+    document.getElementById('last-update').textContent = 'Veri yüklenemedi';
+  } finally {
+    document.getElementById('loading-overlay').classList.remove('show');
+  }
+  applyF();
+}
+
+// ── Filtrele ─────────────────────────────────────────────────────────────────
+function applyF() {
+  const q  = document.getElementById('f-search').value.toLowerCase().trim();
+  const fi = document.getElementById('f-ilce').value;
+  const fk = document.getElementById('f-kat').value;
+  const fr = document.getElementById('f-risk').value;
+  const fd = document.getElementById('f-durum').value;
+  const d1 = document.getElementById('f-d1').value;
+  const d2 = document.getElementById('f-d2').value;
+
+  filtered = allData.filter(d => {
+    if (fi && d.ilce !== fi) return false;
+    if (fk && d.kategori !== fk) return false;
+    if (fr && d.risk !== fr) return false;
+    if (fd && d.durum !== fd) return false;
+    if (d1 && d.tarih && d.tarih < d1) return false;
+    if (d2 && d.tarih && d.tarih > d2) return false;
+    if (q && !((d.baslik||'').toLowerCase().includes(q) || (d.aciklama||'').toLowerCase().includes(q))) return false;
+    return true;
+  });
+
+  renderStats(); renderList(); renderMarkers();
+}
+
+// ── İstatistikler ─────────────────────────────────────────────────────────────
+function renderStats() {
+  const now = new Date().toISOString().slice(0, 7);
+  document.getElementById('st-all').textContent = allData.length;
+  document.getElementById('st-yuk').textContent = allData.filter(d => d.risk === 'yüksek').length;
+  document.getElementById('st-dev').textContent = allData.filter(d => d.durum === 'devam').length;
+  document.getElementById('st-ay').textContent  = allData.filter(d => d.tarih && d.tarih.startsWith(now)).length;
+}
+
+// ── Liste ─────────────────────────────────────────────────────────────────────
+function renderList() {
+  const el = document.getElementById('list');
+  if (!filtered.length) { el.innerHTML = '<div class="nodata">Bu filtreye uygun kayıt bulunamadı.</div>'; return; }
+  el.innerHTML = filtered.map(d => `
+    <div class="rec${selId === d.id ? ' sel' : ''}" onclick="selRecord('${d.id}')">
+      <div class="rt"><span class="rtit">${esc(d.baslik)}</span>
+        <span class="badge ${d.risk === 'yüksek' ? 'b-y' : d.risk === 'orta' ? 'b-o' : 'b-g'}">${d.risk}</span></div>
+      <div class="rm"><span>${esc(d.ilce)}</span><span class="kb">${esc(d.kategori)}</span>
+        <span class="k-durum">${esc(d.durum||'')}</span><span>${d.tarih||''}</span></div>
+    </div>`).join('');
+}
+
+// ── Harita işaretleri ─────────────────────────────────────────────────────────
+function renderMarkers() {
+  Object.values(markers).forEach(m => m.remove()); markers = {};
+  filtered.forEach(d => {
+    if (!d.lat || !d.lng) return;
+    const c = d.risk === 'yüksek' ? '#e24b4a' : d.risk === 'orta' ? '#ef9f27' : '#1d9e75';
+    const ic = ICONS[d.kategori] || '📋';
+    const icon = L.divIcon({
+      className: '',
+      html: `<div style="width:28px;height:28px;border-radius:50%;background:${c};display:flex;align-items:center;justify-content:center;font-size:13px;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,0.25)">${ic}</div>`,
+      iconSize: [28, 28], iconAnchor: [14, 14]
+    });
+    const m = L.marker([d.lat, d.lng], { icon }).addTo(map_);
+    m.bindTooltip(`<b>${esc(d.baslik)}</b><br><small>${d.ilce} · ${d.kategori} · ${d.tarih||''}</small>`, { direction: 'top', offset: [0,-12] });
+    m.on('click', () => selRecord(d.id));
+    markers[d.id] = m;
+  });
+}
+
+// ── Detay ─────────────────────────────────────────────────────────────────────
+function selRecord(id) {
+  selId = id;
+  const d = allData.find(x => x.id === id);
+  if (!d) return;
+  map_.panTo([d.lat, d.lng]);
+  document.getElementById('det-title').textContent = d.baslik;
+  document.getElementById('det-body').innerHTML = `
+    <div class="dr"><span class="dl">İlçe</span><span class="dv">${esc(d.ilce)}</span></div>
+    <div class="dr"><span class="dl">Kategori</span><span class="dv">${esc(d.kategori)}</span></div>
+    <div class="dr"><span class="dl">Risk</span><span class="dv">${esc(d.risk)}</span></div>
+    <div class="dr"><span class="dl">Durum</span><span class="dv">${esc(d.durum||'—')}</span></div>
+    <div class="dr"><span class="dl">Tarih</span><span class="dv">${d.tarih||'—'}</span></div>
+    <div class="dr"><span class="dl">Kaynak</span><span class="dv">${d.kaynak_url ? `<a href="${esc(d.kaynak_url)}" target="_blank">${esc(d.kaynak)}</a>` : esc(d.kaynak)}</span></div>
+    ${d.notlar ? `<div class="dr"><span class="dl">Not</span><span class="dv">${esc(d.notlar)}</span></div>` : ''}
+    <div class="dr"><span class="dl">Açıklama</span><span class="dv">${esc(d.aciklama)}</span></div>`;
+  document.getElementById('det-actions').innerHTML = d.kaynak_url
+    ? `<a href="${esc(d.kaynak_url)}" target="_blank" class="btn btn-sm">🔗 Kaynağa git</a>` : '';
+  document.getElementById('det').style.display = 'block';
+  renderList();
+}
+function closeDet() { selId = null; document.getElementById('det').style.display = 'none'; renderList(); }
+
+// ── Dışa aktar ────────────────────────────────────────────────────────────────
+function exportCSV() {
+  const cols = ['id','ilce','kategori','baslik','risk','durum','tarih','kaynak','kaynak_url','aciklama','notlar','lat','lng'];
+  const rows = filtered.map(d => cols.map(c => '"' + String(d[c]||'').replace(/"/g,'""') + '"').join(';'));
+  dl('antalya_ekoloji_'+td()+'.csv', '\uFEFF'+cols.join(';')+'\n'+rows.join('\n'), 'text/csv');
+}
+function exportJSON()    { dl('antalya_ekoloji_'+td()+'.json', JSON.stringify(filtered,null,2), 'application/json'); }
+function exportGeoJSON() {
+  const geo = { type:'FeatureCollection', features: filtered.filter(d=>d.lat&&d.lng).map(d=>({
+    type:'Feature', geometry:{type:'Point',coordinates:[d.lng,d.lat]}, properties:{...d}
+  }))};
+  dl('antalya_ekoloji_'+td()+'.geojson', JSON.stringify(geo,null,2), 'application/geo+json');
+}
+function dl(name, content, mime) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([content], {type:mime}));
+  a.download = name; a.click();
+}
+
+// ── Yardımcılar ───────────────────────────────────────────────────────────────
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function td()   { return new Date().toISOString().slice(0,10); }
+function showNotif(msg, type) {
+  const el = document.getElementById('notif');
+  el.textContent = msg; el.className = 'notif-' + type; el.style.display = 'block';
+  setTimeout(() => el.style.display = 'none', 5000);
+}
+
+init();
+</script>
+</body>
+</html>
